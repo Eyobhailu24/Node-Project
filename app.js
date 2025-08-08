@@ -1,8 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
-const AppError = require('./utils/appError')
-const globalErrorhandler = require('./controllers/errorController')
+const AppError = require('./utils/appError');
+const globalErrorhandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -32,7 +32,7 @@ app.all('*', (req, res, next) => {
   //   message: `can't find ${req.originalUrl} on this server`,
   // });
 
-  next(new AppError(`can't find ${req.originalUrl} on this server`,404));
+  next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
 });
 
 app.use(globalErrorhandler);
