@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -53,6 +58,20 @@ userSchema.pre('save', async function (next) {
   //Delete password confirm field
   this.passwordConfirm = undefined;
   //goes out of middleware
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; // optional
+  next();
+});
+
+// to only show the users with active value of true
+userSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } }); // not equal to false
   next();
 });
 
@@ -85,13 +104,12 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
 
-    console.log({resetToken},this.passwordResetToken)
+  console.log({ resetToken }, this.passwordResetToken);
 
-    this.passwordResetExpires = Date.now() + 10 * 60 *1000
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
-    return resetToken
+  return resetToken;
 };
-
 
 const User = mongoose.model('User', userSchema);
 
